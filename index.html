@@ -44,6 +44,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chiếu Thang Cho Bố</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             margin: 0;
@@ -74,14 +75,18 @@
         }
         .button {
             border: none;
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 1.2em;
+            padding: 15px 25px;
+            margin: 8px;
+            font-size: 1.1em;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .button:hover {
             transform: scale(1.05);
@@ -89,6 +94,7 @@
         }
         .button:active {
             transform: scale(0.95);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
         }
         .up-down-button {
             background: linear-gradient(45deg, #f97316, #fb923c);
@@ -134,15 +140,15 @@
         .control-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            padding: 20px;
+            gap: 12px;
+            padding: 15px;
             justify-items: center;
             align-items: center;
         }
         .control-grid .empty {
             visibility: hidden;
         }
-        .settings-container {
+        .settings-container, .author-container {
             background: #ffffff;
             color: #2563eb;
             padding: 20px;
@@ -150,6 +156,27 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             width: 90%;
             max-width: 400px;
+        }
+        .author-container p {
+            margin: 10px 0;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+        .history-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 10px;
+            max-height: 100px;
+            overflow-y: auto;
+            width: 90%;
+            max-width: 500px;
+            font-size: 0.9em;
+            color: #ffffff;
+        }
+        .history-container p {
+            margin: 5px 0;
         }
         input[type="number"] {
             padding: 10px;
@@ -159,17 +186,6 @@
             border-radius: 8px;
             border: 1px solid #d1d5db;
             font-family: 'Poppins', sans-serif;
-        }
-        .back-button {
-            background: linear-gradient(45deg, #d1d5db, #9ca3af);
-            color: #2563eb;
-        }
-        .back-button:hover {
-            background: linear-gradient(45deg, #9ca3af, #d1d5db);
-        }
-        .back-button:active {
-            background: linear-gradient(45deg, #6b7280, #9ca3af);
-            color: #ffffff;
         }
         #notification {
             position: fixed;
@@ -189,19 +205,53 @@
             90% { opacity: 1; transform: translateY(0); }
             100% { opacity: 0; transform: translateY(-20px); }
         }
+        .sound-wave {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+            z-index: 100;
+        }
+        .sound-wave.active {
+            animation: wave 0.5s ease-out;
+        }
+        @keyframes wave {
+            0% { transform: scale(0); opacity: 0.7; }
+            100% { transform: scale(2); opacity: 0; }
+        }
         @media (max-width: 600px) {
             h1 {
                 font-size: 1.8em;
             }
             .button {
-                padding: 12px 20px;
-                font-size: 1em;
+                padding: 10px 20px;
+                font-size: 0.9em;
             }
             .control-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-areas: 
+                    "author settings"
+                    "left right"
+                    "stop stop"
+                    "down down";
             }
+            .control-grid .settings-button:nth-child(1) { grid-area: author; }
+            .control-grid .settings-button:nth-child(2) { grid-area: settings; }
+            .control-grid .left-right-button:nth-child(3) { grid-area: left; }
+            .control-grid .left-right-button:nth-child(4) { grid-area: right; }
+            .control-grid .stop-button { grid-area: stop; }
+            .control-grid .up-down-button { grid-area: down; }
+            .control-grid .empty { display: none; }
             .container {
-                padding: 15px;
+                padding: 12px;
+            }
+            .history-container {
+                font-size: 0.8em;
+                max-height: 80px;
             }
         }
     </style>
@@ -209,33 +259,47 @@
 <body>
     <div id="start-screen">
         <div class="container">
-            <h1>Cuộc thi Sáng tạo Thanh thiếu niên Nhi đồng<br>Mô hình Chiếu thang cho bố</h1>
-            <button class="button settings-button" onclick="showControlScreen()">Bắt đầu</button>
+            <h uptime="2025-07-03 22:09:22">
+                <h1>Cuộc thi Sáng tạo Thanh thiếu niên Nhi đồng<br>Mô hình Chiếu thang cho bố</h1>
+                <button class="button settings-button" onclick="showControlScreen()"><i class="fas fa-play"></i> Bắt đầu</button>
+            </div>
         </div>
     </div>
     <div id="control-screen" style="display: none;">
         <div class="container">
             <h1>Điều khiển Thang</h1>
             <div class="control-grid">
+                <button class="button settings-button" onclick="showAuthorScreen()"><i class="fas fa-user"></i> Thông Tin Tác Giả</button>
+                <button class="button up-down-button" onclick="playDTMF('up')"><i class="fas fa-arrow-up"></i> Nâng Thang</button>
+                <button class="button settings-button" onclick="showSettingsScreen()"><i class="fas fa-cog"></i> Cài Đặt</button>
+                <button class="button left-right-button" onclick="playDTMF('left')"><i class="fas fa-arrow-left"></i> Qua Trái</button>
+                <button class="button stop-button" onclick="playDTMF('stop')"><i class="fas fa-square"></i> Dừng</button>
+                <button class="button left-right-button" onclick="playDTMF('right')"><i class="fas fa-arrow-right"></i> Qua Phải</button>
                 <div class="empty"></div>
-                <button class="button up-down-button" onclick="playDTMF('up')">Nâng Thang</button>
-                <button class="button settings-button" onclick="showSettingsScreen()">Cài Đặt</button>
-                <button class="button left-right-button" onclick="playDTMF('left')">Qua Trái</button>
-                <button class="button stop-button" onclick="playDTMF('stop')">Dừng</button>
-                <button class="button left-right-button" onclick="playDTMF('right')">Qua Phải</button>
-                <div class="empty"></div>
-                <button class="button up-down-button" onclick="playDTMF('down')">Hạ Thang</button>
+                <button class="button up-down-button" onclick="playDTMF('down')"><i class="fas fa-arrow-down"></i> Hạ Thang</button>
                 <div class="empty"></div>
             </div>
+            <div class="history-container" id="history">
+                <p>Lịch sử lệnh:</p>
+            </div>
         </div>
+        <div class="sound-wave" id="sound-wave"></div>
     </div>
     <div id="settings-screen" style="display: none;">
         <div class="settings-container">
             <h1>Cài Đặt</h1>
             <label>Thời gian chờ (giây, 0.1–1):</label><br>
             <input type="number" id="wait-time" min="0.1" max="1" step="0.1" value="0.25">
-            <button class="button" onclick="saveSettings()">Xác Nhận</button>
-            <button class="button back-button" onclick="showControlScreen()">Quay Lại</button>
+            <button class="button settings-button" onclick="saveSettings()"><i class="fas fa-check"></i> Xác Nhận</button>
+            <button class="button settings-button" onclick="showControlScreen()"><i class="fas fa-arrow-left"></i> Quay Lại</button>
+        </div>
+    </div>
+    <div id="author-screen" style="display: none;">
+        <div class="author-container">
+            <h1>Thông Tin Tác Giả</h1>
+            <p><strong>Nguyễn Đoàn Khôi</strong><br>Ngày sinh: 09/06/2012<br>Lớp: 8A1, THCS Nguyễn Tất Thành<br>Địa chỉ: Quảng Phú, Cư Mgar, Đắk Lắk</p>
+            <p><strong>Lê Hoàng Dương</strong><br>Ngày sinh: 26/01/2010<br>Lớp: 9A3, THCS Nguyễn Tất Thành<br>Địa chỉ: Quảng Phú, Cư Mgar, Đắk Lắk</p>
+            <button class="button settings-button" onclick="showControlScreen()"><i class="fas fa-arrow-left"></i> Quay Lại</button>
         </div>
     </div>
     <div id="notification"></div>
@@ -250,6 +314,7 @@
         };
         let waitTime = 0.25;
         let audioContext = null;
+        let commandHistory = [];
 
         function showNotification(message) {
             const notification = document.getElementById('notification');
@@ -258,14 +323,36 @@
             setTimeout(() => notification.style.display = 'none', 2000);
         }
 
+        function updateHistory(command) {
+            const time = new Date().toLocaleTimeString('vi-VN');
+            commandHistory.unshift(`${command} lúc ${time}`);
+            if (commandHistory.length > 5) commandHistory.pop();
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML = '<p>Lịch sử lệnh:</p>' + commandHistory.map(cmd => `<p>${cmd}</p>`).join('');
+        }
+
+        function showSoundWave() {
+            const wave = document.getElementById('sound-wave');
+            const stopButton = document.querySelector('.stop-button');
+            const rect = stopButton.getBoundingClientRect();
+            wave.style.left = `${rect.left + rect.width / 2}px`;
+            wave.style.top = `${rect.top + rect.height / 5}px`;
+            wave.classList.add('active');
+            setTimeout(() => wave.classList.remove('active'), 500);
+        }
+
         function initializeAudioContext() {
+            if (!window.AudioContext && !window.webkitAudioContext) {
+                showNotification('Lỗi: Trình duyệt không hỗ trợ Web Audio API!');
+                return;
+            }
             if (!audioContext || audioContext.state === 'closed') {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioContext.state === 'suspended') {
                     audioContext.resume().then(() => {
                         showNotification('Âm thanh đã sẵn sàng!');
                     }).catch(() => {
-                        showNotification('Lỗi: Không thể khởi động âm thanh!');
+                        showNotification('Lỗi: Không thể khởi động âm thanh! Vui lòng nhấn lại.');
                     });
                 }
             }
@@ -275,19 +362,28 @@
             document.getElementById('start-screen').style.display = 'block';
             document.getElementById('control-screen').style.display = 'none';
             document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('author-screen').style.display = 'none';
         }
 
         function showControlScreen() {
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('control-screen').style.display = 'block';
             document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('author-screen').style.display = 'none';
             initializeAudioContext();
         }
 
         function showSettingsScreen() {
             document.getElementById('control-screen').style.display = 'none';
             document.getElementById('settings-screen').style.display = 'block';
+            document.getElementById('author-screen').style.display = 'none';
             document.getElementById('wait-time').value = waitTime;
+        }
+
+        function showAuthorScreen() {
+            document.getElementById('control-screen').style.display = 'none';
+            document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('author-screen').style.display = 'block';
         }
 
         function saveSettings() {
@@ -303,8 +399,10 @@
         }
 
         function playTone(freq1, freq2, duration) {
+
+
             if (!audioContext || audioContext.state !== 'running') {
-                showNotification('Lỗi: Âm thanh chưa sẵn sàng!');
+                showNotification('Lỗi: Âm thanh chưa sẵn sàng! Vui lòng nhấn lại.');
                 return;
             }
 
@@ -316,7 +414,7 @@
             oscillator2.type = 'sine';
             oscillator1.frequency.setValueAtTime(freq1, audioContext.currentTime);
             oscillator2.frequency.setValueAtTime(freq2, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.7, audioContext.currentTime);
 
             oscillator1.connect(gainNode);
             oscillator2.connect(gainNode);
@@ -333,32 +431,40 @@
         async function playDTMF(command) {
             initializeAudioContext();
             if (audioContext.state !== 'running') {
-                showNotification('Lỗi: Vui lòng thử lại!');
+                showNotification('Lỗi: Âm thanh chưa sẵn sàng! Vui lòng nhấn lại.');
                 return;
             }
 
+            showSoundWave();
+            let commandText;
             switch (command) {
                 case 'up':
+                    commandText = 'Nâng Thang';
                     playTone(852, 1336, 0.2);
                     await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
                     playTone(941, 1477, 0.2);
                     break;
                 case 'down':
+                    commandText = 'Hạ Thang';
                     playTone(770, 1209, 0.2);
                     await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
                     playTone(941, 1477, 0.2);
                     break;
                 case 'right':
+                    commandText = 'Qua Phải';
                     playTone(941, 1336, 0.2);
                     break;
                 case 'left':
+                    commandText = 'Qua Trái';
                     playTone(770, 1336, 0.2);
                     break;
                 case 'stop':
+                    commandText = 'Dừng';
                     playTone(941, 1477, 0.2);
                     break;
             }
-            showNotification('Đã phát lệnh: ' + command);
+            showNotification('Đã phát lệnh: ' + commandText);
+            updateHistory(commandText);
         }
 
         // Initialize with start screen
