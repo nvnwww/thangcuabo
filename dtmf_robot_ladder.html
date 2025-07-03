@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chiếu thang cho bố</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #2563eb;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .start-screen, .control-screen, .settings-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    .visible {
+      display: flex;
+    }
+    h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin: 1rem;
+    }
+    button {
+      background-color: white;
+      color: #2563eb;
+      padding: 1rem;
+      font-size: 1.25rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 200px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #d1d5db;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem;
+    }
+    .setting-box {
+      background-color: white;
+      color: black;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    input[type=number] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      width: 100px;
+    }
+    .history {
+      background-color: #ffffff;
+      color: #000000;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      width: 300px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .history h3 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="start-screen visible" id="startScreen">
+    <h1>Cuộc thi Sáng tạo Thanh thiếu niên Nhi đồng<br>Mô hình Chiếu thang cho bố</h1>
+    <button onclick="showControls()">Bắt đầu</button>
+  </div>
+
+  <div class="control-screen" id="controlScreen">
+    <h1>Điều khiển thang robot</h1>
+    <div class="grid">
+      <button onclick="playCommand('up')">Nâng thang</button>
+      <button onclick="playCommand('down')">Hạ thang</button>
+      <button onclick="playCommand('left')">Qua trái</button>
+      <button onclick="playCommand('right')">Qua phải</button>
+      <button onclick="playCommand('stop')">Dừng</button>
+      <button onclick="showSettings()">Cài đặt</button>
+    </div>
+    <div class="history" id="historyBox">
+      <h3>Lịch sử lệnh</h3>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <div class="settings-screen" id="settingsScreen">
+    <div class="setting-box">
+      <label>Thời gian chờ (x) (giây, 0.1 - 1.0):</label>
+      <input type="number" id="delayInput" min="0.1" max="1" step="0.05" value="0.25">
+      <button onclick="saveDelay()">Xác nhận</button>
+      <button style="background:#d1d5db;color:black;" onclick="backToControls()">Quay lại</button>
+    </div>
+  </div>
+
+  <script>
+    let delayTime = 0.25;
+    const historyList = document.getElementById('historyList');
+
+    const frequencies = {
+      '0': [941, 1336],
+      '4': [770, 1209],
+      '5': [770, 1336],
+      '8': [852, 1336],
+      '#': [941, 1477]
+    };
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const context = new AudioContext();
+
+    function playDTMF(key, duration = 200) {
+      if (!frequencies[key]) return;
+      const [f1, f2] = frequencies[key];
+      const osc1 = context.createOscillator();
+      const osc2 = context.createOscillator();
+      const gain = context.createGain();
+
+      osc1.frequency.value = f1;
+      osc2.frequency.value = f2;
+      gain.gain.setValueAtTime(0.5, context.currentTime);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(context.destination);
+
+      osc1.start();
+      osc2.start();
+      osc1.stop(context.currentTime + duration / 1000);
+      osc2.stop(context.currentTime + duration / 1000);
+
+      osc1.onended = () => {
+        osc1.disconnect();
+        osc2.disconnect();
+        gain.disconnect();
+      };
+
+      console.log(`Đã phát âm DTMF ${key}`);
+    }
+
+    function addHistory(command) {
+      const time = new Date().toLocaleTimeString();
+      const li = document.createElement('li');
+      li.textContent = `${time}: Lệnh "${command}"`;
+      historyList.prepend(li);
+    }
+
+    function playCommand(cmd) {
+      if (context.state === 'suspended') {
+        context.resume();
+      }
+      if (cmd === 'up') {
+        playDTMF('8');
+        setTimeout(() => playDTMF('#'), delayTime * 1000);
+      } else if (cmd === 'down') {
+        playDTMF('4');
+        setTimeout(() => playDTMF('#'), delayTime * 1000);
+      } else if (cmd === 'left') {
+        playDTMF('5');
+      } else if (cmd === 'right') {
+        playDTMF('0');
+      } else if (cmd === 'stop') {
+        playDTMF('#');
+      }
+      addHistory(cmd);
+      alert(`Đã gửi lệnh "${cmd}"`);
+    }
+
+    function showControls() {
+      document.getElementById('startScreen').classList.remove('visible');
+      document.getElementById('controlScreen').classList.add('visible');
+    }
+
+    function showSettings() {
+      document.getElementById('controlScreen').classList.remove('visible');
+      document.getElementById('settingsScreen').classList.add('visible');
+    }
+
+    function backToControls() {
+      document.getElementById('settingsScreen').classList.remove('visible');
+      document.getElementById('controlScreen').classList.add('visible');
+    }
+
+    function saveDelay() {
+      const input = document.getElementById('delayInput');
+      const value = parseFloat(input.value);
+      if (value >= 0.1 && value <= 1.0) {
+        delayTime = value;
+        alert(`Đã lưu thời gian chờ: ${delayTime}s`);
+        backToControls();
+      } else {
+        alert('Giá trị không hợp lệ. Vui lòng nhập từ 0.1 đến 1.0 giây.');
+      }
+    }
+  </script>
+</body>
+</html>
