@@ -259,10 +259,8 @@
 <body>
     <div id="start-screen">
         <div class="container">
-            <h uptime="2025-07-03 22:09:22">
-                <h1>Cuộc thi Sáng tạo Thanh thiếu niên Nhi đồng<br>Mô hình Chiếu thang cho bố</h1>
-                <button class="button settings-button" onclick="showControlScreen()"><i class="fas fa-play"></i> Bắt đầu</button>
-            </div>
+            <h1>Cuộc thi Sáng tạo Thanh thiếu niên Nhi đồng<br>Mô hình Chiếu thang cho bố</h1>
+            <button class="button settings-button" onclick="showControlScreen()"><i class="fas fa-play"></i> Bắt đầu</button>
         </div>
     </div>
     <div id="control-screen" style="display: none;">
@@ -336,7 +334,7 @@
             const stopButton = document.querySelector('.stop-button');
             const rect = stopButton.getBoundingClientRect();
             wave.style.left = `${rect.left + rect.width / 2}px`;
-            wave.style.top = `${rect.top + rect.height / 5}px`;
+            wave.style.top = `${rect.top + rect.height / 2}px`;
             wave.classList.add('active');
             setTimeout(() => wave.classList.remove('active'), 500);
         }
@@ -344,7 +342,7 @@
         function initializeAudioContext() {
             if (!window.AudioContext && !window.webkitAudioContext) {
                 showNotification('Lỗi: Trình duyệt không hỗ trợ Web Audio API!');
-                return;
+                return false;
             }
             if (!audioContext || audioContext.state === 'closed') {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -356,6 +354,7 @@
                     });
                 }
             }
+            return true;
         }
 
         function showStartScreen() {
@@ -399,8 +398,6 @@
         }
 
         function playTone(freq1, freq2, duration) {
-
-
             if (!audioContext || audioContext.state !== 'running') {
                 showNotification('Lỗi: Âm thanh chưa sẵn sàng! Vui lòng nhấn lại.');
                 return;
@@ -429,11 +426,7 @@
         }
 
         async function playDTMF(command) {
-            initializeAudioContext();
-            if (audioContext.state !== 'running') {
-                showNotification('Lỗi: Âm thanh chưa sẵn sàng! Vui lòng nhấn lại.');
-                return;
-            }
+            if (!initializeAudioContext()) return;
 
             showSoundWave();
             let commandText;
