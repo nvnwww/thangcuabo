@@ -43,51 +43,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chiếu Thang Cho Bố</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            background-color: #2563eb;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
             color: #ffffff;
             text-align: center;
             overflow: auto;
         }
         h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
         }
         .button {
-            background-color: #ffffff;
-            color: #2563eb;
             border: none;
             padding: 15px 30px;
             margin: 10px;
             font-size: 1.2em;
+            font-weight: 600;
             border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .button:hover {
             transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .button:active {
+            transform: scale(0.95);
+        }
+        .up-down-button {
+            background: linear-gradient(45deg, #f97316, #fb923c);
+            color: #ffffff;
+        }
+        .up-down-button:hover {
+            background: linear-gradient(45deg, #fb923c, #f97316);
+        }
+        .up-down-button:active {
+            background: linear-gradient(45deg, #c2410c, #ea580c);
+        }
+        .left-right-button {
+            background: linear-gradient(45deg, #22c55e, #4ade80);
+            color: #ffffff;
+        }
+        .left-right-button:hover {
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+        }
+        .left-right-button:active {
+            background: linear-gradient(45deg, #15803d, #16a34a);
+        }
+        .stop-button {
+            background: linear-gradient(45deg, #ef4444, #f87171);
+            color: #ffffff;
+        }
+        .stop-button:hover {
+            background: linear-gradient(45deg, #f87171, #ef4444);
+        }
+        .stop-button:active {
+            background: linear-gradient(45deg, #b91c1c, #dc2626);
+        }
+        .settings-button {
+            background: linear-gradient(45deg, #d1d5db, #9ca3af);
+            color: #2563eb;
+        }
+        .settings-button:hover {
+            background: linear-gradient(45deg, #9ca3af, #d1d5db);
+        }
+        .settings-button:active {
+            background: linear-gradient(45deg, #6b7280, #9ca3af);
+            color: #ffffff;
         }
         .control-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            max-width: 600px;
-            width: 90%;
+            gap: 15px;
+            padding: 20px;
+            justify-items: center;
+            align-items: center;
+        }
+        .control-grid .empty {
+            visibility: hidden;
         }
         .settings-container {
-            background-color: #ffffff;
+            background: #ffffff;
             color: #2563eb;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             width: 90%;
             max-width: 400px;
         }
@@ -95,52 +155,78 @@
             padding: 10px;
             font-size: 1em;
             width: 100px;
-            margin: 10px 0;
-            border-radius: 5px;
+            margin: 15px 0;
+            border-radius: 8px;
             border: 1px solid #d1d5db;
+            font-family: 'Poppins', sans-serif;
         }
         .back-button {
-            background-color: #d1d5db;
+            background: linear-gradient(45deg, #d1d5db, #9ca3af);
             color: #2563eb;
+        }
+        .back-button:hover {
+            background: linear-gradient(45deg, #9ca3af, #d1d5db);
+        }
+        .back-button:active {
+            background: linear-gradient(45deg, #6b7280, #9ca3af);
+            color: #ffffff;
         }
         #notification {
             position: fixed;
             top: 20px;
-            background-color: #ffffff;
+            background: linear-gradient(45deg, #ffffff, #e5e7eb);
             color: #2563eb;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             display: none;
             z-index: 1000;
+            animation: fadeInOut 2s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
         }
         @media (max-width: 600px) {
             h1 {
-                font-size: 1.5em;
+                font-size: 1.8em;
             }
             .button {
-                padding: 10px 20px;
+                padding: 12px 20px;
                 font-size: 1em;
             }
             .control-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .container {
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
     <div id="start-screen">
-        <h1>Cuộc thi Sáng tạo Thanh thiếu niên Nhi đồng<br>Mô hình Chiếu thang cho bố</h1>
-        <button class="button" onclick="showControlScreen()">Bắt đầu</button>
+        <div class="container">
+            <h1>Cuộc thi Sáng tạo Thanh thiếu niên Nhi đồng<br>Mô hình Chiếu thang cho bố</h1>
+            <button class="button settings-button" onclick="showControlScreen()">Bắt đầu</button>
+        </div>
     </div>
     <div id="control-screen" style="display: none;">
-        <h1>Điều khiển Thang</h1>
-        <div class="control-grid">
-            <button class="button" onclick="playDTMF('up')">Nâng Thang</button>
-            <button class="button" onclick="playDTMF('down')">Hạ Thang</button>
-            <button class="button" onclick="playDTMF('right')">Qua Phải</button>
-            <button class="button" onclick="playDTMF('left')">Qua Trái</button>
-            <button class="button" onclick="playDTMF('stop')">Dừng</button>
-            <button class="button" onclick="showSettingsScreen()">Cài Đặt</button>
+        <div class="container">
+            <h1>Điều khiển Thang</h1>
+            <div class="control-grid">
+                <div class="empty"></div>
+                <button class="button up-down-button" onclick="playDTMF('up')">Nâng Thang</button>
+                <button class="button settings-button" onclick="showSettingsScreen()">Cài Đặt</button>
+                <button class="button left-right-button" onclick="playDTMF('left')">Qua Trái</button>
+                <button class="button stop-button" onclick="playDTMF('stop')">Dừng</button>
+                <button class="button left-right-button" onclick="playDTMF('right')">Qua Phải</button>
+                <div class="empty"></div>
+                <button class="button up-down-button" onclick="playDTMF('down')">Hạ Thang</button>
+                <div class="empty"></div>
+            </div>
         </div>
     </div>
     <div id="settings-screen" style="display: none;">
